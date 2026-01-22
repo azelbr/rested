@@ -16,7 +16,13 @@ if (!isset($_FILES['arquivo']) || $_FILES['arquivo']['error'] !== UPLOAD_ERR_OK)
 
 $titulo = $_POST['titulo'] ?? 'Documento';
 $file = $_FILES['arquivo'];
-$ext = pathinfo($file['name'], PATHINFO_EXTENSION);
+$ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+$allowed = ['pdf', 'jpg', 'jpeg', 'png', 'doc', 'docx'];
+
+if (!in_array($ext, $allowed)) {
+    jsonResponse(['error' => 'Formato não permitido. Apenas PDF e Imagens.'], 400);
+}
+
 $filename = uniqid('doc_') . '.' . $ext;
 $uploadDir = '../uploads/';
 

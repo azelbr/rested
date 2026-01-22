@@ -1,9 +1,14 @@
 <?php
+require_once __DIR__ . '/utils.php';
+
+// Load .env
+loadEnv(__DIR__ . '/../.env');
+
 // Configurações do Banco de Dados
-$host = 'sql300.ezyro.com';
-$db = 'ezyro_40904790_rested';
-$user = 'ezyro_40904790';
-$pass = 'ecbcbf493905f'; // Senha padrão vazia para XAMPP/WAMP. Altere se necessário.
+$host = getenv('DB_HOST') ?: 'localhost';
+$db = getenv('DB_NAME') ?: 'rested';
+$user = getenv('DB_USER') ?: 'root';
+$pass = getenv('DB_PASS') ?: '';
 $charset = 'utf8mb4';
 
 $dsn = "mysql:host=$host;dbname=$db;charset=$charset";
