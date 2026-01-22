@@ -113,6 +113,26 @@ require 'src/head.php';
                 <span class="font-bold text-slate-700 text-sm">Mudar Senha</span>
             </a>
 
+            <?php if ($role === 'admin'): ?>
+                <!-- Admin: Usuários -->
+                <a href="usuarios.php"
+                    class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center justify-center gap-2 aspect-[4/3] active:scale-95 transition-transform hover:shadow-md">
+                    <div class="bg-orange-100 text-orange-600 p-3 rounded-full">
+                        <ion-icon name="people-outline" class="text-2xl"></ion-icon>
+                    </div>
+                    <span class="font-bold text-slate-700 text-sm">Usuários</span>
+                </a>
+
+                <!-- Admin: Histórico -->
+                <a href="logs.php"
+                    class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center justify-center gap-2 aspect-[4/3] active:scale-95 transition-transform hover:shadow-md">
+                    <div class="bg-gray-100 text-gray-600 p-3 rounded-full">
+                        <ion-icon name="time-outline" class="text-2xl"></ion-icon>
+                    </div>
+                    <span class="font-bold text-slate-700 text-sm">Histórico</span>
+                </a>
+            <?php endif; ?>
+
         </div>
     </main>
 
