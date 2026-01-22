@@ -1,0 +1,23 @@
+<?php
+
+function jsonResponse($data, $status = 200)
+{
+    header('Content-Type: application/json');
+    http_response_code($status);
+    echo json_encode($data);
+    exit;
+}
+
+function getJsonInput()
+{
+    return json_decode(file_get_contents('php://input'), true);
+}
+
+function sanitize($input)
+{
+    if (is_array($input)) {
+        return array_map('sanitize', $input);
+    }
+    return htmlspecialchars(strip_tags(trim($input)));
+}
+?>
