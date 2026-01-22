@@ -28,6 +28,14 @@ if ($user && password_verify($senha, $user['senha_hash'])) {
     $_SESSION['nome'] = $user['nome'];
     $_SESSION['role'] = $user['role'];
 
+    // Registrar Log de Login
+    try {
+        $logStmt = $pdo->prepare("INSERT INTO login_logs (user_id) VALUES (?)");
+        $logStmt->execute([$user['id']]);
+    } catch (Exception $e) {
+        // Falha silenciosa no log não deve impedir o login
+    }
+
     jsonResponse([
         'message' => 'Login realizado com sucesso!',
         'role' => $user['role'],
