@@ -49,4 +49,25 @@ Para que o upload de documentos funcione, a pasta `uploads` precisa ter permiss�
 ```bash
 chmod 777 uploads/
 ```
-*(Ou dar permissão específica para o usuário do servidor web `www-data`)*
+
+---
+
+## 🚀 Deploy em VPS (Hospedagem na Nuvem)
+
+Se você estiver enviando para uma VPS (DigitalOcean, AWS, Hostinger, etc) via SFTP:
+
+### ❌ O que NÃO enviar:
+*   **Pasta `.git`**: **Jamais envie**. Ela contém todo o histórico do projeto, é pesada e perigosa se ficar exposta.
+*   **Arquivo `.gitignore`**: Opcional. Não serve para nada no servidor de produção.
+*   **Arquivo `.env` (LOCAL)**: **Não substitua** o `.env` do servidor pelo do seu computador se as senhas forem diferentes.
+
+### ✅ O que enviar:
+*   Todas as pastas de código (`src`, `api`, `assets`).
+*   Todos os arquivos `.php` da raiz (`index.php`, `dashboard.php`, etc).
+*   Pasta `uploads` (vazia ou com os arquivos que quer manter).
+*   Arquivo `.htaccess` (Muito importante para segurança!).
+
+### 📝 Checklist VPS
+1.  Suba os arquivos (menos `.git`).
+2.  Crie o banco de dados no painel da VPS.
+3.  Edite o arquivo `.env` **lá na VPS** com a senha do banco da VPS.
