@@ -37,6 +37,51 @@ $saldo_inicial_sistema = (float) ($stmt->fetchColumn() ?: 0);
 $saldo_anterior = $saldo_inicial_sistema + $ant_rec - $ant_desp;
 $saldo_atual = $saldo_anterior + $total_receitas - $total_despesas;
 
+// --- Nova Lógica: Inadimplência Total ---
+// 1. Buscar configuração
+$stmt = $pdo->query("SELECT setting_value FROM system_settings WHERE setting_key = 'show_total_overdue'");
+$show_total_overdue = (bool) $stmt->fetchColumn();
+
+// 2. Calcular apenas se necessário (Admin sempre vê cálculo para poder decidir, ou se a opção estiver ativa)
+$total_inadimplentes = 0;
+$total_parcelas_atraso = 0;
+
+if ($show_total_overdue || $_SESSION['role'] === 'admin') {
+    $stmtUser = $pdo->query("SELECT id FROM users WHERE role = 'normal'");
+    $allUsers = $stmtUser->fetchAll();
+
+    foreach ($allUsers as $u) {
+        $d = calculateDebt($pdo, $u['id']);
+        if ($d['count'] > 0) {
+            $total_inadimplentes++;
+            $total_parcelas_atraso += $d['count'];
+        }
+    }
+}
+
+// --- Nova Lógica: Inadimplência Total ---
+// 1. Buscar configuração
+$stmt = $pdo->query("SELECT setting_value FROM system_settings WHERE setting_key = 'show_total_overdue'");
+$show_total_overdue = (bool) $stmt->fetchColumn();
+
+// 2. Calcular apenas se necessário (Admin sempre vê cálculo para poder decidir, ou se a opção estiver ativa)
+$total_inadimplentes = 0;
+$total_parcelas_atraso = 0;
+
+if ($show_total_overdue || $_SESSION['role'] === 'admin') {
+    $stmtUser = $pdo->query("SELECT id FROM users WHERE role = 'normal'");
+    $allUsers = $stmtUser->fetchAll();
+
+    foreach ($allUsers as $u) {
+        // A função calculateDebt já considera a data de início de cada usuário!
+        $d = calculateDebt($pdo, $u['id']);
+        if ($d['count'] > 0) {
+            $total_inadimplentes++;
+            $total_parcelas_atraso += $d['count'];
+        }
+    }
+}
+
 require 'src/head.php';
 ?>
 
@@ -107,6 +152,50 @@ require 'src/head.php';
             <div class="mt-4 text-xs text-center text-slate-400">
                 Saldo Inicial Sistema: R$ <?php echo number_format($saldo_inicial_sistema, 2, ',', '.'); ?>
             </div>
+        <?php endif; ?>
+
+        <!-- Nova Seção de Inadimplência -->
+        <?php if ($show_total_overdue || $_SESSION['role'] === 'admin'): ?>
+            <div class="mt-4 bg-orange-50 border border-orange-200 rounded-xl p-4 flex items-center justify-between <?php echo ($show_total_overdue ? '' : 'opacity-60 grayscale'); ?>">
+                <div class="flex items-center gap-3">
+                    <div class="bg-orange-100 text-orange-600 p-2 rounded-full">
+                        <ion-icon name="warning" class="text-xl"></ion-icon>
+                    </div>
+                    <div>
+                        <p class="text-xs text-orange-600 font-bold uppercase tracking-wider">Inadimplência</p>
+                        <p class="text-orange-900 font-medium text-sm">
+                            <span class="font-bold text-lg"><?php echo $total_parcelas_atraso; ?></span> parcelas em aberto
+                            <span class="text-xs text-orange-400">(<?php echo $total_inadimplentes; ?> moradores)</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        <?php endif; ?>
+
+        <!-- Admin Toggle Switch -->
+        <?php if ($_SESSION['role'] === 'admin'): ?>
+            <div class="mt-4 flex items-center justify-center gap-2">
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="toggleOverdue" class="sr-only peer" <?php echo $show_total_overdue ? 'checked' : ''; ?>>
+                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                    <span class="ml-3 text-sm font-medium text-gray-700">Mostrar Inadimplência na Tela</span>
+                </label>
+            </div>
+            
+            <script>
+                document.getElementById('toggleOverdue').addEventListener('change', async function() {
+                    const isChecked = this.checked ? '1' : '0';
+                    try {
+                        const res = await fetch('api/update_settings.php', {
+                            method: 'POST',
+                            body: JSON.stringify({ key: 'show_total_overdue', value: isChecked })
+                        });
+                        if (res.ok) window.location.reload();
+                    } catch (err) {
+                        alert('Erro ao atualizar configuração');
+                    }
+                });
+            </script>
         <?php endif; ?>
 
     </div>
