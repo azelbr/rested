@@ -56,11 +56,39 @@ require 'src/head.php';
                             <?php echo date('d/m/Y', strtotime($doc['data_upload'])); ?>
                         </p>
                     </div>
-                    <ion-icon name="download-outline" class="text-slate-400"></ion-icon>
+                    <div class="flex items-center gap-2">
+                        <ion-icon name="download-outline" class="text-slate-400"></ion-icon>
+
+                        <?php if ($role === 'admin'): ?>
+                            <button onclick="event.preventDefault(); deleteDoc(<?php echo $doc['id']; ?>)"
+                                class="text-red-400 hover:text-red-600 p-2 rounded-full hover:bg-red-50 transition"
+                                title="Excluir">
+                                <ion-icon name="trash-outline"></ion-icon>
+                            </button>
+                        <?php endif; ?>
+                    </div>
                 </a>
             <?php endforeach; ?>
         </div>
     </div>
+
+    <!-- Script de Exclusão -->
+    <script>
+        async function deleteDoc(id) {
+            if (!confirm('Tem certeza que deseja excluir este documento?')) return;
+
+            try {
+                const res = await fetch('api/delete_documento.php', {
+                    method: 'POST',
+                    body: JSON.stringify({ id: id })
+                });
+                if (res.ok) window.location.reload();
+                else alert('Erro ao excluir');
+            } catch (e) {
+                alert('Erro de conexão');
+            }
+        }
+    </script>
 
     <?php require 'src/navbar.php'; ?>
 </body>
